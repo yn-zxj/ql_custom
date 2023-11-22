@@ -1,3 +1,10 @@
+/*
+机票信息查询
+
+cron: 00 10,18 * * *
+const $ = new Env("机票信息查询");
+*/
+
 const axios = require('axios');
 const dayjs = require('dayjs');
 
