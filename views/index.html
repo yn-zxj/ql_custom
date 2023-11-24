@@ -27,7 +27,7 @@
 
       .title {
         font-weight: bold;
-        font-size: 17px;
+        font-size: clamp(0.875rem, 0.516rem + 1.25vw, 1.063rem);
         padding-bottom: 5px;
         color: #56004f;
       }
@@ -70,10 +70,17 @@
         font-size: 18px;
         color: #be002f;
       }
+
+      .charts-svg {
+        text-align: center;
+      }
     </style>
   </head>
 
   <body>
+    <div class="main-title">去哪儿价格曲线</div>
+    <a style="text-decoration: none" href="{{oneWayUrl}}" class="charts-svg"> {{qunarPrice|safe}} </a>
+    <div class="separator"></div>
     <!-- 单程 -->
     <div class="main-title">单程</div>
     {% for item in oneWay %}
@@ -118,7 +125,7 @@
           <div class="subtitle">{{flight.originDepDate}} {{flight.depWeekDay}}</div>
         </div>
         <div class="right">
-          <div class="discount">{{`均价¥`flight.averagePrice if (item.title === '国内降价榜') else (flight.discount if flight.discount else '')}}</div>
+          <div class="discount">{{'均价¥'+flight.averagePrice if (item.title === '国内降价榜') else (flight.discount if flight.discount else '')}}</div>
           <div class="price"><span class="currency">¥</span>{{flight.price}}</div>
         </div>
       </a>
