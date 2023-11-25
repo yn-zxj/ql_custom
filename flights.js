@@ -83,7 +83,8 @@ async function main(info) {
 
   // 输出字符串
   const svgStr = chart.renderToSVGString();
-  flightInfo.qunarPrice = svgStr;
+  // 微信推送需要删除,否则无法正常展示
+  flightInfo.qunarPrice = svgStr.replace(/<defs[^>]*>[\s\S]*?<\/defs>/g, '');
   flightInfo.oneWayUrl = `https://m.flight.qunar.com/ncs/page/flightlist?depCity=${info.from}&arrCity=${info.to}&goDate=${dayjs().format('YYYY-MM-DD')}&from=touch_index_search&child=0&baby=0&cabinType=0`;
 
   // 调用 dispose 以释放内存
