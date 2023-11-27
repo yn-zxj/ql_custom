@@ -42,11 +42,11 @@ async function main(info) {
   };
 
   // 单程
-  let priceCalendar = await qunarPriceCalendar('Oneway');
+  let priceCalendar = await ctripPriceCalendar('Oneway');
   const prices = Object.values(priceCalendar.data.data.oneWayPrice[0]);
   const dates = Object.keys(priceCalendar.data.data.oneWayPrice[0]).map(x => x.substring(4, 6) + '-' + x.substring(6, 9));
   // 往返
-  // priceCalendar = await qunarPriceCalendar();
+  // priceCalendar = await ctripPriceCalendar();
   // const roundPrices = Object.values(priceCalendar.data.data.roundTripPrice[0]);
 
   const chart = echarts.init(null, null, {
@@ -94,7 +94,7 @@ async function main(info) {
   let qunarGlobalPriceResult = await qunarGlobalPrice(info.from, info.to);
   for (const item of qunarGlobalPriceResult.cityFlights) {
     for (const flight of item.flights) {
-      console.log("%s → %s\t航班号:%s\t价格:%s(%s)\t出发日期:%s\t返回日期:%s", info.from, info.to, flight.carrier, flight.price, flight.tip, flight.depDate, flight.backDate ? flight.backDate : 'null');
+      console.log("%s → %s\t航班号:%s\t价格:%s(%s)\t出发日期:%s\t返回日期:%s\n", info.from, info.to, flight.carrier, flight.price, flight.tip, flight.depDate, flight.backDate ? flight.backDate : 'null');
       flightInfo.oneWay.push({
         schema: item.allPriceSchemaUrl,
         depCity: qunarGlobalPriceResult.depCity,
@@ -148,7 +148,7 @@ async function main(info) {
   const html = nunjucks.render('index.html', flightInfo);
 
   // 发送的html
-  console.log('发送的HTML:\n%s\n', html);
+  // console.log('发送的HTML:\n%s\n', html);
 
   // 消息推送
   sendMsg(info.id, 'wwe758307ce630ee74', '3YrzZFoqgXdi0Xtyea8fN8-a5u8c_cWHaWsjfiXf8SM', '1000008', '机票信息', '2te06Li1BraZz2ETHA_Gpanu6Y5PwMVT_QsuP4vwH90dcMsqClrJegBnpZHVgVd8V', html, '机票助手', dayjs().format('YYYY-MM-DD HH:mm:ss') + ` 机票信息`);
@@ -253,8 +253,12 @@ async function qunarGlobalPrice(depCity, arrCity, flag = false) {
   return result.data;
 };
 
-
-async function qunarPriceCalendar(flightWay) {
+/**
+ * 携程低价日历
+ * @param {string} flightWay eg:Oneway-单程 Roundtrip-往返
+ * @returns 
+ */
+async function ctripPriceCalendar(flightWay) {
   if (flightWay === 'Oneway') {
     return await axios.get(`https://flights.ctrip.com/itinerary/api/12808/lowestPrice?flightWay=Oneway&dcity=SZX&acity=KMG&direct=true`);
   }

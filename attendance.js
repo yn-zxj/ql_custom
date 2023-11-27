@@ -3,8 +3,8 @@
 早上 08:40 08:50 09:00 提醒
 下午 18:00 18:10 18:20 提醒
 
-cron: 00,40,50 8,9 * * *
-cron: 00,10,20 18 * * *
+cron: 00,40,50 8,9 * * * now
+cron: 00,10,20 18 * * * now
 const $ = new Env("考勤提醒");
 */
 
@@ -22,7 +22,7 @@ let remind = '📝 记得签到哦！';
 
 // 判断是否是工作日
 if (isWorkday(today)) {
-    if (isSpecificTime(['08:40', '08:50', '09:00'], now.format('HH:mm'))) {
+    if (isSpecificTime(['18:00', '18:10', '18:20'], now.format('HH:mm'))) {
         title = '💼 签退提醒';
         subtitle = '下班啦!';
         remind = '📝 记得签退哦！';
@@ -31,7 +31,7 @@ if (isWorkday(today)) {
         sendNotify(title, `${subtitle}\n${time}\n${remind}`, {}, '\n');
     }
 
-    if (isSpecificTime(['18:00', '18:10', '18:20'], now.format('HH:mm'))) {
+    if (isSpecificTime(['08:40', '08:50', '09:00'], now.format('HH:mm'))) {
         // 发送消息
         sendNotify(title, `${subtitle}\n${time}\n${remind}`, {}, '\n');
     }
