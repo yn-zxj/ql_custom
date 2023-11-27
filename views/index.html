@@ -71,18 +71,29 @@
         color: #be002f;
       }
 
+      .sub-title {
+        font-weight: bold;
+        padding-left: 5px;
+        font-size: 16px;
+        color: #56004f;
+      }
+
       .charts-svg {
-        text-align: center;
+        text-decoration: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     </style>
   </head>
 
   <body>
-    <div class="main-title">携程价格曲线</div>
-    <a style="text-decoration: none" href="{{oneWayUrl}}" class="charts-svg"> {{qunarPrice|safe}} </a>
+    <div class="main-title">价格曲线(携程)</div>
+    <div class="sub-title">{{info.from}} → {{info.to}}</div>
+    <a href="{{oneWayUrl}}" class="charts-svg"> {{tripPrice|safe}} </a>
     <div class="separator"></div>
     <!-- 单程 -->
-    <div class="main-title">单程</div>
+    <div class="main-title">单程(去哪儿)</div>
     {% for item in oneWay %}
     <a href="{{item.schema}}>" class="container" style="min-height: 100px; max-width: 100%">
       <div class="left">
@@ -98,7 +109,7 @@
     <div class="separator"></div>
 
     <!-- 往返 -->
-    <div class="main-title">往返</div>
+    <div class="main-title">往返(去哪儿)</div>
     {% for item in roundTrip %}
     <a href="{{item.schema}}" class="container" style="min-height: 100px; max-width: 100%">
       <div class="left">
@@ -116,7 +127,7 @@
 
     <!-- 去哪儿低价 -->
     {% for item in qunarLowPrice %}
-    <div class="main-title">{{item.title}}</div>
+    <div class="main-title">{{item.title}}(去哪儿)</div>
     <div style="display: flex; flex-wrap: wrap; justify-content: center">
       {% for flight in item.flightInfoList %}
       <a href="{{flight.scheme}}" class="container">

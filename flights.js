@@ -12,9 +12,12 @@ const echarts = require('echarts');
 
 // 用户信息
 const flight_list = [
+  // zhang
   {
     from: '深圳',
+    from_code: 'SZX',
     to: '昆明',
+    to_code: 'KMG',
     id: '@all'
   }
 ];
@@ -34,21 +37,23 @@ for (const item of flight_list) {
  */
 async function main(info) {
   let flightInfo = {
-    qunarPrice: '', // 去哪价格曲线
+    info,
+    tripPrice: '', // 携程价格曲线
     oneWayUrl: '',
-    oneWay: [], // 单程
-    roundTrip: [], // 往返
+    oneWay: [], // 去哪儿单程
+    roundTrip: [], // 去哪儿往返
     qunarLowPrice: [], // 去哪儿低价
   };
 
-  // 单程
-  let priceCalendar = await ctripPriceCalendar('Oneway');
+  // 携程单程
+  let priceCalendar = await ctripPriceCalendar('Oneway', info);
   const prices = Object.values(priceCalendar.data.data.oneWayPrice[0]);
   const dates = Object.keys(priceCalendar.data.data.oneWayPrice[0]).map(x => x.substring(4, 6) + '-' + x.substring(6, 9));
-  // 往返
+  // 往返(暂没想到什么好的表现形式)
   // priceCalendar = await ctripPriceCalendar();
   // const roundPrices = Object.values(priceCalendar.data.data.roundTripPrice[0]);
 
+  // 单程加个曲线展示
   const chart = echarts.init(null, null, {
     renderer: 'svg',
     ssr: true,
@@ -56,7 +61,6 @@ async function main(info) {
     height: 350
   });
 
-  // 像正常使用一样 setOption
   chart.setOption({
     animation: false,
     xAxis: {
@@ -84,7 +88,7 @@ async function main(info) {
   // 输出字符串
   const svgStr = chart.renderToSVGString();
   // 微信推送需要删除,否则无法正常展示
-  flightInfo.qunarPrice = svgStr.replace(/<defs[^>]*>[\s\S]*?<\/defs>/g, '');
+  flightInfo.tripPrice = svgStr.replace(/<defs[^>]*>[\s\S]*?<\/defs>/g, '');
   flightInfo.oneWayUrl = `https://m.flight.qunar.com/ncs/page/flightlist?depCity=${info.from}&arrCity=${info.to}&goDate=${dayjs().format('YYYY-MM-DD')}&from=touch_index_search&child=0&baby=0&cabinType=0`;
 
   // 调用 dispose 以释放内存
@@ -92,6 +96,7 @@ async function main(info) {
 
   // 单程
   let qunarGlobalPriceResult = await qunarGlobalPrice(info.from, info.to);
+  console.log('单程');
   for (const item of qunarGlobalPriceResult.cityFlights) {
     for (const flight of item.flights) {
       console.log("%s → %s\t航班号:%s\t价格:%s(%s)\t出发日期:%s\t返回日期:%s\n", info.from, info.to, flight.carrier, flight.price, flight.tip, flight.depDate, flight.backDate ? flight.backDate : 'null');
@@ -111,9 +116,10 @@ async function main(info) {
 
   // 往返
   qunarGlobalPriceResult = await qunarGlobalPrice(info.from, info.to, true);
+  console.log('往返');
   for (const item of qunarGlobalPriceResult.cityFlights) {
     for (const flight of item.flights) {
-      console.log("%s → %s\t航班号:%s\t价格:%s(%s)\t出发日期:%s\t返回日期:%s", info.from, info.to, flight.carrier, flight.price, flight.tip, flight.depDate, flight.backDate ? flight.backDate : 'null');
+      console.log("%s → %s\t航班号:%s\t价格:%s(%s)\t出发日期:%s\t返回日期:%s\n", info.from, info.to, flight.carrier, flight.price, flight.tip, flight.depDate, flight.backDate ? flight.backDate : 'null');
       flightInfo.roundTrip.push({
         schema: item.allPriceSchemaUrl,
         depCity: qunarGlobalPriceResult.depCity,
@@ -238,16 +244,17 @@ async function qunar(locationCity) {
 };
 
 /**
- * 目的地机票查询(endTime时间需要修改)
+ * 目的地机票查询(时间范围:当日-当日+180天)
  * @param {boolean} flag 往返(true)
  * @returns 机票信息
  */
 async function qunarGlobalPrice(depCity, arrCity, flag = false) {
+  const time = dayjs();
   // 单程
-  let b = { "uid": "0bc15ef0-8f88-41c2-8501-60197d63c8d3", "sortType": 1, "cat": "touch_flight_home_multiOneWay", "gid": "", "selectPriceCeiling": 0, "selectPriceFloor": 1, "travelDays": [2, 15], "userName": "", "isIos": 2, "tripType": 0, "depTime": { "startTime": "2023-11-19", "endTime": "2024-05-17" }, "depCity": depCity, "conditions": { "newCityList": [arrCity] }, "defaultTravelDays": false, "unite": 1, "qpversion": 120 };
+  let b = { "uid": "0bc15ef0-8f88-41c2-8501-60197d63c8d3", "sortType": 1, "cat": "touch_flight_home_multiOneWay", "gid": "", "selectPriceCeiling": 0, "selectPriceFloor": 1, "travelDays": [2, 15], "userName": "", "isIos": 2, "tripType": 0, "depTime": { "startTime": time.format('YYYY-MM-DD'), "endTime": time.add(180, 'day').format('YYYY-MM-DD') }, "depCity": depCity, "conditions": { "newCityList": [arrCity] }, "defaultTravelDays": false, "unite": 1, "qpversion": 120 };
   if (flag) {
     // 往返
-    b = { "uid": "0bc15ef0-8f88-41c2-8501-60197d63c8d3", "sortType": 1, "cat": "touch_flight_home_multiOneWay", "gid": "", "selectPriceCeiling": 0, "selectPriceFloor": 1, "travelDays": [2, 15], "userName": "", "isIos": 2, "tripType": 1, "depTime": { "startTime": "2023-11-19", "endTime": "2024-05-17" }, "depCity": depCity, "conditions": { "newCityList": [arrCity] }, "defaultTravelDays": true, "unite": 1, "qpversion": 120, "flyTime": {}, "topics": [], "visas": [] };
+    b = { "uid": "0bc15ef0-8f88-41c2-8501-60197d63c8d3", "sortType": 1, "cat": "touch_flight_home_multiOneWay", "gid": "", "selectPriceCeiling": 0, "selectPriceFloor": 1, "travelDays": [2, 15], "userName": "", "isIos": 2, "tripType": 1, "depTime": { "startTime": time.format('YYYY-MM-DD'), "endTime": time.add(180, 'day').format('YYYY-MM-DD') }, "depCity": depCity, "conditions": { "newCityList": [arrCity] }, "defaultTravelDays": true, "unite": 1, "qpversion": 120, "flyTime": {}, "topics": [], "visas": [] };
   }
   const result = await axios.get(`https://m.flight.qunar.com/hy/proxy/globalPrice/getFlightList?b=${JSON.stringify(b)}`);
   return result.data;
@@ -255,12 +262,11 @@ async function qunarGlobalPrice(depCity, arrCity, flag = false) {
 
 /**
  * 携程低价日历
- * @param {string} flightWay eg:Oneway-单程 Roundtrip-往返
+ * @param {string} flightWay Oneway-单程 Roundtrip-往返
+ * @param {object} info      用户信息
  * @returns 
  */
-async function ctripPriceCalendar(flightWay) {
-  if (flightWay === 'Oneway') {
-    return await axios.get(`https://flights.ctrip.com/itinerary/api/12808/lowestPrice?flightWay=Oneway&dcity=SZX&acity=KMG&direct=true`);
-  }
-  return await axios.get(`https://flights.ctrip.com/itinerary/api/12808/lowestPrice?flightWay=Roundtrip&dcity=SZX&acity=KMG&direct=true`);
+async function ctripPriceCalendar(flightWay, info) {
+  let url = `https://flights.ctrip.com/itinerary/api/12808/lowestPrice?flightWay=${flightWay}&dcity=${info.from_code}&acity=${info.to_code}&direct=true`;
+  return await axios.get(url);
 };
