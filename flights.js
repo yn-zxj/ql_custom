@@ -39,7 +39,8 @@ async function main(info) {
   let flightInfo = {
     info,
     tripPrice: '', // 携程价格曲线
-    oneWayUrl: '',
+    tripUrl: '', // 携程url
+    qunarUrl: '', // 去哪儿url
     oneWay: [], // 去哪儿单程
     roundTrip: [], // 去哪儿往返
     qunarLowPrice: [], // 去哪儿低价
@@ -53,6 +54,10 @@ async function main(info) {
   // priceCalendar = await ctripPriceCalendar();
   // const roundPrices = Object.values(priceCalendar.data.data.roundTripPrice[0]);
 
+  // 去哪儿单程日历
+  let qunarLowResult = await qunarPriceCalendar(info);
+  const qunarLowPrices = qunarLowResult.data.data.gflights.map(x => x.price);
+
   // 单程加个曲线展示
   const chart = echarts.init(null, null, {
     renderer: 'svg',
@@ -63,6 +68,12 @@ async function main(info) {
 
   chart.setOption({
     animation: false,
+    title: {
+      text: `${info.from} → ${info.to}`,
+      textStyle: {
+        color: '#2080f0'
+      }
+    },
     xAxis: {
       type: 'category',
       name: '日期',
@@ -77,11 +88,17 @@ async function main(info) {
         data: [...prices],
         type: 'line',
         smooth: true,
-        name: '单程'
+        name: '携程'
+      },
+      {
+        data: [...qunarLowPrices],
+        type: 'line',
+        smooth: true,
+        name: '去哪儿'
       }
     ],
     legend: {
-      data: ['单程']
+      data: ['携程', '去哪儿']
     }
   });
 
@@ -89,7 +106,8 @@ async function main(info) {
   const svgStr = chart.renderToSVGString();
   // 微信推送需要删除,否则无法正常展示
   flightInfo.tripPrice = svgStr.replace(/<defs[^>]*>[\s\S]*?<\/defs>/g, '');
-  flightInfo.oneWayUrl = `https://m.flight.qunar.com/ncs/page/flightlist?depCity=${info.from}&arrCity=${info.to}&goDate=${dayjs().format('YYYY-MM-DD')}&from=touch_index_search&child=0&baby=0&cabinType=0`;
+  flightInfo.tripUrl = `https://m.ctrip.com/html5/flight/pages/middle?dcode=${info.from_code}&acode=${info.to_code}&ddate=${dayjs().format('YYYY-MM-DD')}&tripType=ONE_WAY`;
+  flightInfo.qunarUrl = `https://m.flight.qunar.com/ncs/page/flightlist?depCity=${info.from}&arrCity=${info.to}&goDate=${dayjs().format('YYYY-MM-DD')}&from=touch_index_search&child=0&baby=0&cabinType=0`;
 
   // 调用 dispose 以释放内存
   chart.dispose();
@@ -270,3 +288,13 @@ async function ctripPriceCalendar(flightWay, info) {
   let url = `https://flights.ctrip.com/itinerary/api/12808/lowestPrice?flightWay=${flightWay}&dcity=${info.from_code}&acity=${info.to_code}&direct=true`;
   return await axios.get(url);
 };
+
+/**
+ * 去哪儿低价日历(默认查询180天)
+ * @param {object} info 用户信息
+ * @returns 
+ */
+async function qunarPriceCalendar(info) {
+  let url = `https://gw.flight.qunar.com/api/f/priceCalendar?dep=${info.from}&arr=${info.to}&days=180&priceType=1`;
+  return await axios.get(url);
+}
