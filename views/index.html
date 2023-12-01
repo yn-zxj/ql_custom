@@ -83,6 +83,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        background-color: #fff;
       }
 
       .trip {
@@ -98,17 +99,37 @@
         background-repeat: no-repeat;
         background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSI1NSIgc3Ryb2tlPSIjYTJhOWI2IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIGZpbGw9Im5vbmUiIC8+PHRleHQgeD0iNTAlIiB5PSI1NSUiIGZvbnQtc2l6ZT0iODAiIGZpbGw9IiNhMmE5YjYiIGZpbGwtb3BhY2l0eT0iMC4yIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCBzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0cmFuc2Zvcm09InJvdGF0ZSg0NSA2MCA2MCkiPuWTqjwvdGV4dD48L3N2Zz4=');
       }
+
+      .title-h3 {
+        margin-top: 10px;
+        padding: 0px;
+        font-weight: bold;
+        font-size: 22px;
+        border-bottom: 2px solid #d2f0f4;
+        margin-bottom: 10px;
+        color: #177cb0;
+      }
+
+      .content {
+        font-size: 22px;
+        display: inline-block;
+        border-bottom: 2px solid #30dff3;
+      }
     </style>
   </head>
 
   <body>
-    <div class="main-title">各平台价格曲线</div>
+    <h3 class="title-h3"><span class="content">各平台价格曲线</span></h3>
     <div class="charts-svg"> {{tripPrice|safe}} </div>
+
+    <h3 class="title-h3"><span class="content">今日票价</span></h3>
     <div style="display: flex; flex-wrap: wrap; justify-content: center">
       <a href="{{tripUrl}}" class="container" style="max-width: 100px; height: 20px; color: #fff; background-color: #2080f0; justify-content: center; border-radius: 20px"> 携程(跳转) </a>
       <a href="{{qunarUrl}}" class="container" style="max-width: 100px; height: 20px; color: #fff; background-color: #18a058; justify-content: center; border-radius: 20px"> 去哪儿(跳转) </a>
     </div>
     <div class="separator"></div>
+
+    <h3 class="title-h3"><span class="content">近期低价</span></h3>
     <!-- 单程 -->
     <div class="main-title">单程</div>
     {% for item in oneWay %}
@@ -142,6 +163,7 @@
     {% endfor %}
     <div class="separator"></div>
 
+    <h3 class="title-h3"><span class="content">热门地区</span></h3>
     <!-- 去哪儿低价 -->
     {% for item in qunarLowPrice %}
     <div class="main-title">{{item.title}}</div>
