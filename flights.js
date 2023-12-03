@@ -60,7 +60,10 @@ async function main(info) {
 
   // 飞猪单程低价日历
   let fliggyResult = await fliggyCalendar(info);
-  const fliggyLowPrices = fliggyResult.data.data.cheapestPriceCalendar.map(x => x.price);
+  let fliggyLowPrices = [];
+  if (fliggyResult.data.data.cheapestPriceCalendar !== undefined) {
+    fliggyLowPrices = fliggyResult.data.data.cheapestPriceCalendar.map(x => x.price);
+  }
 
   // 单程加个曲线展示
   const chart = echarts.init(null, null, {
