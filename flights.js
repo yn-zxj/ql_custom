@@ -74,6 +74,7 @@ async function main(info) {
     animation: false,
     title: {
       text: `${info.from} → ${info.to}`,
+      left: '5%',
       textStyle: {
         color: '#2080f0'
       }
@@ -111,7 +112,8 @@ async function main(info) {
       }
     ],
     legend: {
-      data: ['携程', '去哪儿', '飞猪']
+      data: ['携程', '去哪儿', '飞猪'],
+      right: '10%',
     }
   });
 
@@ -185,7 +187,7 @@ async function main(info) {
   const html = nunjucks.render('index.html', flightInfo);
 
   // 发送的html
-  console.log('发送的HTML:\n%s\n', html);
+  // console.log('发送的HTML:\n%s\n', html);
 
   // 消息推送
   sendMsg(info.id, 'wwe758307ce630ee74', '3YrzZFoqgXdi0Xtyea8fN8-a5u8c_cWHaWsjfiXf8SM', '1000008', '机票信息', '2te06Li1BraZz2ETHA_Gpanu6Y5PwMVT_QsuP4vwH90dcMsqClrJegBnpZHVgVd8V', html, '机票助手', dayjs().format('YYYY-MM-DD HH:mm:ss') + ` 机票信息`);
