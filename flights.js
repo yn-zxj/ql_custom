@@ -58,6 +58,10 @@ async function main(info) {
   let qunarLowResult = await qunarPriceCalendar(info);
   const qunarLowPrices = qunarLowResult.data.data.gflights.map(x => x.price);
 
+  // 飞猪单程低价日历
+  let fliggyResult = await fliggyCalendar(info);
+  const fliggyLowPrices = fliggyResult.data.data.cheapestPriceCalendar.map(x => x.price);
+
   // 单程加个曲线展示
   const chart = echarts.init(null, null, {
     renderer: 'svg',
@@ -88,17 +92,26 @@ async function main(info) {
         data: [...prices],
         type: 'line',
         smooth: true,
-        name: '携程'
+        name: '携程',
+        color: '#FBDB0F'
       },
       {
         data: [...qunarLowPrices],
         type: 'line',
         smooth: true,
-        name: '去哪儿'
+        name: '去哪儿',
+        color: '#7415DB'
+      },
+      {
+        data: [...fliggyLowPrices],
+        type: 'line',
+        smooth: true,
+        name: '飞猪',
+        color: '#AC3B2A'
       }
     ],
     legend: {
-      data: ['携程', '去哪儿']
+      data: ['携程', '去哪儿', '飞猪']
     }
   });
 
@@ -172,7 +185,7 @@ async function main(info) {
   const html = nunjucks.render('index.html', flightInfo);
 
   // 发送的html
-  // console.log('发送的HTML:\n%s\n', html);
+  console.log('发送的HTML:\n%s\n', html);
 
   // 消息推送
   sendMsg(info.id, 'wwe758307ce630ee74', '3YrzZFoqgXdi0Xtyea8fN8-a5u8c_cWHaWsjfiXf8SM', '1000008', '机票信息', '2te06Li1BraZz2ETHA_Gpanu6Y5PwMVT_QsuP4vwH90dcMsqClrJegBnpZHVgVd8V', html, '机票助手', dayjs().format('YYYY-MM-DD HH:mm:ss') + ` 机票信息`);
@@ -297,4 +310,16 @@ async function ctripPriceCalendar(flightWay, info) {
 async function qunarPriceCalendar(info) {
   let url = `https://gw.flight.qunar.com/api/f/priceCalendar?dep=${info.from}&arr=${info.to}&days=180&priceType=1`;
   return await axios.get(url);
+}
+
+/**
+ * 飞猪低价日历(默认查询365天)
+ * @param {object} info 用户信息
+ * @returns 
+ */
+async function fliggyCalendar(info) {
+  let data = { depCityCode: info.from_code, arrCityCode: info.to_code, dayNum: 365, h5Version: "1.39.3" };
+  let cookie = '_fli_titleHeight=0; _fli_screenDix=1.8115942028985508; miid=406052881856623991; mt=ci%3D-1_0; cna=ymfrHbdUiiECATr6+jqI6sHr; _fli_isNotch=0; l=fBjwkZ4lPu-yn8wZBOfwFurza77OQIRAguPzaNbMi9fP9K195xPAW1Eu-a8pCnGVFsGyR3zzwi5HBeYBc3K-nxvTMXGfHtHmnmOk-Wf..; _samesite_flag_=true; cookie2=19b6a0bb41402363d2aea74ac0b60b52; t=51c6c42a24f81b48b540a02d10a80cc8; _tb_token_=330f3117857b3; _m_h5_tk=5e4398d44c37e6902024c086f955e3fd_1701593113354; _m_h5_tk_enc=12e7b0657b957524a24f6a3c012b4bf2; isg=BMfHIYN9bjL7suqIlNKTlrvBVn2RzJuuEgkW4Zm04tZ9COXKoZyG_pCOr85WvXMm';
+  const url = `https://h5api.m.taobao.com/h5/mtop.trip.flight.getCheapestPriceCalendar/1.0?type=originaljson&api=mtop.trip.flight.getCheapestPriceCalendar&v=1.0&data=${encodeURIComponent(JSON.stringify(data))}&needLogin=false&ttid=201300@travel_h5_3.1.0&appKey=12574478&t=1701584482334&sign=63cf6bdb59d373568f68ee4349ff762e`;
+  return await axios.get(url, { headers: { cookie: cookie, Host: 'h5api.m.taobao.com' } });
 }

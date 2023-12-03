@@ -100,6 +100,13 @@
         background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSI1NSIgc3Ryb2tlPSIjYTJhOWI2IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIGZpbGw9Im5vbmUiIC8+PHRleHQgeD0iNTAlIiB5PSI1NSUiIGZvbnQtc2l6ZT0iODAiIGZpbGw9IiNhMmE5YjYiIGZpbGwtb3BhY2l0eT0iMC4yIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCBzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0cmFuc2Zvcm09InJvdGF0ZSg0NSA2MCA2MCkiPuWTqjwvdGV4dD48L3N2Zz4=');
       }
 
+      .pig {
+        background-position: calc(100% - 5px) 5px;
+        background-size: 40px;
+        background-repeat: no-repeat;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSI1NSIgc3Ryb2tlPSIjYTJhOWI2IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIGZpbGw9Im5vbmUiIC8+PHRleHQgeD0iNTAlIiB5PSI1NSUiIGZvbnQtc2l6ZT0iODAiIGZpbGw9IiNhMmE5YjYiIGZpbGwtb3BhY2l0eT0iMC4yIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCBzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0cmFuc2Zvcm09InJvdGF0ZSg0NSA2MCA2MCkiPueMqjwvdGV4dD48L3N2Zz4=');
+      }
+
       .title-h3 {
         margin-top: 10px;
         padding: 0px;
@@ -172,7 +179,7 @@
       <a href="{{flight.scheme}}" class="container qunaer">
         <div class="left">
           <div class="title">{{flight.depCity}} {{ '↔' if flight.backWeekDay else '→' }} {{flight.arrCity}}</div>
-          <div class="subtitle">{{flight.originDepDate}} {{flight.depWeekDay}}</div>
+          {{('<div class="subtitle">'+flight.depDate+' '+flight.depWeekDayDesc+'</div><div class="subtitle">'+flight.backDate+' '+flight.backWeekDayDesc+'</div>' if flight.backWeekDay else '<div class="subtitle">'+flight.depDate+' '+flight.depWeekDay+'</div>')|safe}}
         </div>
         <div class="right">
           <div class="discount">{{'均价¥'+flight.averagePrice if (item.title === '国内降价榜') else (flight.discount if flight.discount else '')}}</div>
