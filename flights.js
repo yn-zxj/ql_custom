@@ -128,7 +128,7 @@ async function main(info) {
   flightInfo.tripUrl = `https://m.ctrip.com/html5/flight/pages/middle?dcode=${info.from_code}&acode=${info.to_code}&ddate=${dayjs().format('YYYY-MM-DD')}&tripType=ONE_WAY`;
   flightInfo.qunarUrl = `https://m.flight.qunar.com/ncs/page/flightlist?depCity=${info.from}&arrCity=${info.to}&goDate=${dayjs().format('YYYY-MM-DD')}&from=touch_index_search&child=0&baby=0&cabinType=0`;
 
-  let initUrl = `https://m.ctrip.com/webapp/flightactivity/muse/multiCityList.html?info={"aCityCode":${info.from_code},"aCityName":${info.from},"aCityType":1,"dCityCode":${info.to_code},"dCityName":${info.to_code},"dCityType":1,"departDate":${day().format('YYYY-MM-DD')},"intl":false}&source=theme`;
+  let initUrl = `https://m.ctrip.com/webapp/flightactivity/muse/multiCityList.html?info={"aCityCode":${info.from_code},"aCityName":${info.from},"aCityType":1,"dCityCode":${info.to_code},"dCityName":${info.to_code},"dCityType":1,"departDate":${dayjs().format('YYYY-MM-DD')},"intl":false}&source=theme`;
   flightInfo.tripUrl = encodeURIComponent(initUrl);
   // 调用 dispose 以释放内存
   chart.dispose();
