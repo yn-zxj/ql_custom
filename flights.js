@@ -366,6 +366,7 @@ async function fliggyCalendar(info) {
 /**
  * 携程低价查询(默认查询180天)
  * @param {object} info 用户信息
+ * @link https://m.ctrip.com/webapp/flightactivity/muse/index.html
  * @returns 
  */
 async function tripLowFlight(info) {
@@ -411,6 +412,7 @@ async function tripLowFlight(info) {
 /**
  * 携程其他分类低价查询(默认查询180天)
  * @param {object} info 用户信息
+ * @link https://m.ctrip.com/webapp/flightactivity/muse/index.html
  * @returns 
  */
 async function tripLowFlightOther(info) {
