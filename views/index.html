@@ -127,7 +127,7 @@
 
   <body>
     <h3 class="title-h3"><span class="content">各平台价格曲线</span></h3>
-    <div class="charts-svg"> {{tripPrice|safe}} </div>
+    <div class="charts-svg"> {{priceSvg|safe}} </div>
 
     <h3 class="title-h3"><span class="content">今日票价</span></h3>
     <div style="display: flex; flex-wrap: wrap; justify-content: center">
@@ -170,7 +170,7 @@
     {% endfor %}
     <div class="separator"></div>
 
-    <h3 class="title-h3"><span class="content">热门地区</span></h3>
+    <h3 class="title-h3"><span class="content">去哪儿热门地区</span></h3>
     <!-- 去哪儿低价 -->
     {% for item in qunarLowPrice %}
     <div class="main-title">{{item.title}}</div>
@@ -190,5 +190,22 @@
     </div>
     <div class="separator"></div>
     {% endfor %}
+
+    <div class="main-title">携程降价榜单</div>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center">
+      {% for flight in tripLowPrice %}
+      <a href="{{flight.jumpUrl}}" class="container trip">
+        <div class="left">
+          <div class="title">{{flight.depCity}} → {{flight.arrCity}}</div>
+          <div class="subtitle">{{flight.depDate}}(去)</div>
+        </div>
+        <div class="right">
+          <div class="discount">{{'均价¥'+flight.prePrice if flight.prePrice !== null else ('已降'+flight.discount+'%' if flight.discount else '')}}</div>
+          <div class="price"><span class="currency">¥</span>{{flight.price}}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="separator"></div>
   </body>
 </html>

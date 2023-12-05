@@ -38,12 +38,13 @@ for (const item of flight_list) {
 async function main(info) {
   let flightInfo = {
     info,
-    tripPrice: '', // 携程价格曲线
+    priceSvg: '', // 价格曲线
     tripUrl: '', // 携程url
     qunarUrl: '', // 去哪儿url
     oneWay: [], // 去哪儿单程
     roundTrip: [], // 去哪儿往返
     qunarLowPrice: [], // 去哪儿低价
+    tripLowPrice: [], // 携程低价
   };
 
   // 携程单程
@@ -123,7 +124,7 @@ async function main(info) {
   // 输出字符串
   const svgStr = chart.renderToSVGString();
   // 微信推送需要删除,否则无法正常展示
-  flightInfo.tripPrice = svgStr.replace(/<defs[^>]*>[\s\S]*?<\/defs>/g, '');
+  flightInfo.priceSvg = svgStr.replace(/<defs[^>]*>[\s\S]*?<\/defs>/g, '');
   flightInfo.tripUrl = `https://m.ctrip.com/html5/flight/pages/middle?dcode=${info.from_code}&acode=${info.to_code}&ddate=${dayjs().format('YYYY-MM-DD')}&tripType=ONE_WAY`;
   flightInfo.qunarUrl = `https://m.flight.qunar.com/ncs/page/flightlist?depCity=${info.from}&arrCity=${info.to}&goDate=${dayjs().format('YYYY-MM-DD')}&from=touch_index_search&child=0&baby=0&cabinType=0`;
 
@@ -180,6 +181,39 @@ async function main(info) {
     }
     console.log("");
   }
+
+  // 携程低价榜单
+  const tripLowFlightResult = await tripLowFlight(info);
+  console.log("携程低价榜");
+  tripLowFlightResult.data.routes.map(x => {
+    for (const item of x.pl) {
+      flightInfo.tripLowPrice.push({
+        depCity: x.departCity.name,
+        arrCity: x.arriveCity.name,
+        depDate: item.departDate,
+        price: item.price,
+        prePrice: item.prePrice,
+        discount: Math.abs(item.rate) * 100,
+        jumpUrl: item.jumpUrl
+      });
+      console.log("%s → %s\t票价:%s(历史价:%s)\t出发日期:%s(折扣:%s)", x.departCity.name, x.arriveCity.name, item.price, item.prePrice, item.departDate, item.rate);
+    }
+  });
+  const tripLowFlightOtherResult = await tripLowFlightOther(info);
+  tripLowFlightOtherResult.data.routes.map(x => {
+    for (const item of x.pl) {
+      flightInfo.tripLowPrice.push({
+        depCity: x.departCity.name,
+        arrCity: x.arriveCity.name,
+        depDate: item.departDate,
+        price: item.price,
+        prePrice: item.prePrice,
+        discount: Math.abs(item.decRate) * 100,
+        jumpUrl: item.jumpUrl
+      });
+      console.log("%s → %s\t票价:%s(历史价:%s)\t出发日期:%s(折扣:%s)", x.departCity.name, x.arriveCity.name, item.price, item.prePrice, item.departDate, item.decRate);
+    }
+  });
 
   // 模版路径
   nunjucks.configure('views', {
@@ -327,4 +361,83 @@ async function fliggyCalendar(info) {
   let cookie = '_fli_titleHeight=0; _fli_screenDix=1.8115942028985508; miid=406052881856623991; mt=ci%3D-1_0; cna=ymfrHbdUiiECATr6+jqI6sHr; _fli_isNotch=0; l=fBjwkZ4lPu-yn8wZBOfwFurza77OQIRAguPzaNbMi9fP9K195xPAW1Eu-a8pCnGVFsGyR3zzwi5HBeYBc3K-nxvTMXGfHtHmnmOk-Wf..; _samesite_flag_=true; cookie2=19b6a0bb41402363d2aea74ac0b60b52; t=51c6c42a24f81b48b540a02d10a80cc8; _tb_token_=330f3117857b3; _m_h5_tk=5e4398d44c37e6902024c086f955e3fd_1701593113354; _m_h5_tk_enc=12e7b0657b957524a24f6a3c012b4bf2; isg=BMfHIYN9bjL7suqIlNKTlrvBVn2RzJuuEgkW4Zm04tZ9COXKoZyG_pCOr85WvXMm';
   const url = `https://h5api.m.taobao.com/h5/mtop.trip.flight.getCheapestPriceCalendar/1.0?type=originaljson&api=mtop.trip.flight.getCheapestPriceCalendar&v=1.0&data=${encodeURIComponent(JSON.stringify(data))}&needLogin=false&ttid=201300@travel_h5_3.1.0&appKey=12574478&t=1701584482334&sign=63cf6bdb59d373568f68ee4349ff762e`;
   return await axios.get(url, { headers: { cookie: cookie, Host: 'h5api.m.taobao.com' } });
+}
+
+/**
+ * 携程低价查询(默认查询180天)
+ * @param {object} info 用户信息
+ * @returns 
+ */
+async function tripLowFlight(info) {
+  const time = dayjs();
+  let data = {
+    "guid": "4692ed20-d63f-4e46-821d-c0af0134756c",
+    "tt": 1,
+    "st": 11,
+    "source": "priceReduction",
+    "segments": [
+      {
+        "dcl": [info.from_code],
+        "drl": [
+          {
+            "begin": time.format('YYYY-MM-DD'),
+            "end": time.add(180, 'day').format('YYYY-MM-DD')
+          }
+        ],
+        "acl": [
+          "all"
+        ]
+      }
+    ],
+    "head": {
+      "cid": "09031120316726350642",
+      "ctok": "",
+      "cver": "",
+      "lang": "01",
+      "sid": "8888",
+      "syscode": "09",
+      "auth": "",
+      "extension": [
+        {
+          "name": "protocal",
+          "value": "https"
+        }
+      ]
+    }
+  };
+  return await axios.post('https://m.ctrip.com/restapi/soa2/19728/fuzzySearch?_fxpcqlniredt=09031120316726350642', data);
+}
+
+/**
+ * 携程其他分类低价查询(默认查询180天)
+ * @param {object} info 用户信息
+ * @returns 
+ */
+async function tripLowFlightOther(info) {
+  let data = {
+    "guid": "4692ed20-d63f-4e46-821d-c0af0134756c",
+    "source": "theme",
+    "st": 14,
+    "segments": [
+      {
+        "dcl": [info.from_code],
+      }
+    ],
+    "head": {
+      "cid": "09031120316726350642",
+      "ctok": "",
+      "cver": "",
+      "lang": "01",
+      "sid": "8888",
+      "syscode": "09",
+      "auth": "",
+      "extension": [
+        {
+          "name": "protocal",
+          "value": "https"
+        }
+      ]
+    }
+  };
+  return await axios.post('https://m.ctrip.com/restapi/soa2/19728/fuzzySearch?_fxpcqlniredt=09031120316726350642', data);
 }
